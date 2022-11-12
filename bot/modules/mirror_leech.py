@@ -20,6 +20,7 @@ from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, auto_delete_message
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from .listener import MirrorLeechListener
+import json
 
 def _mirror_leech(bot, message, isZip=False, extract=False, isQbit=False, isLeech=False):
     buttons = ButtonMaker()
