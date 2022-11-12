@@ -106,140 +106,149 @@ def _mirror_leech(bot, message, isZip=False, extract=False, isQbit=False, isLeec
     else:
         tag = message.from_user.mention_html(message.from_user.first_name)
 
-    reply_to = message.reply_to_message
-    if reply_to is not None:
-        file_ = reply_to.document or reply_to.video or reply_to.audio or reply_to.photo or None
-        if not reply_to.from_user.is_bot:
-            if reply_to.from_user.username:
-                tag = f"@{reply_to.from_user.username}"
+
+    LOGGER.info(f'data message {message_args[1]}')
+    dataTorrent = rget(f'https://magnetread.onrender.com/special/?date={message_args[1]}')
+    LOGGER.info(f'data response{json.loads(dataTorrent.content)}')
+    torrentLink = json.loads(dataTorrent.content)
+    if len(torrentLink)==0:
+        torrentLink=[message_args[1]]
+    
+    for link in torrentLink:
+        reply_to = message.reply_to_message
+        if reply_to is not None:
+            file_ = reply_to.document or reply_to.video or reply_to.audio or reply_to.photo or None
+            if not reply_to.from_user.is_bot:
+                if reply_to.from_user.username:
+                    tag = f"@{reply_to.from_user.username}"
+                else:
+                    tag = reply_to.from_user.mention_html(reply_to.from_user.first_name)
+            if len(link) == 0 or not is_url(link) and not is_magnet(link):
+                if file_ is None:
+                    reply_text = reply_to.text.split(maxsplit=1)[0].strip()
+                    if is_url(reply_text) or is_magnet(reply_text):
+                        link = reply_to.text.strip()
+                elif isinstance(file_, list):
+                    link = file_[-1].get_file().file_path
+                elif not isQbit and file_.mime_type != "application/x-bittorrent":
+                    listener = MirrorLeechListener(bot, message, isZip, extract, isQbit, isLeech, pswd, tag)
+                    Thread(target=TelegramDownloadHelper(listener).add_download, args=(message, f'{DOWNLOAD_DIR}{listener.uid}/', name)).start()
+                    if multi > 1:
+                        sleep(4)
+                        nextmsg = type('nextmsg', (object, ), {'chat_id': message.chat_id, 'message_id': message.reply_to_message.message_id + 1})
+                        nextmsg = sendMessage(message.text.replace(str(multi), str(multi - 1), 1), bot, nextmsg)
+                        nextmsg.from_user.id = message.from_user.id
+                        sleep(4)
+                        Thread(target=_mirror_leech, args=(bot, nextmsg, isZip, extract, isQbit, isLeech)).start()
+                    return
+                else:
+                    link = file_.get_file().file_path
+
+        if not is_url(link) and not is_magnet(link):
+            help_msg = "<b>Send link along with command line:</b>"
+            if isQbit:
+                help_msg += "\n<code>/qbcmd</code> {link} pswd: xx [zip/unzip]"
+                help_msg += "\n\n<b>By replying to link/file:</b>"
+                help_msg += "\n<code>/qbcmd</code> pswd: xx [zip/unzip]"
+                help_msg += "\n\n<b>Bittorrent selection:</b>"
+                help_msg += "\n<code>/qbcmd</code> <b>s</b> {link} or by replying to {file/link}"
+                help_msg += "\n\n<b>Qbittorrent seed</b>:"
+                help_msg += "\n<code>/qbcmd</code> <b>d</b> {link} or by replying to {file/link}.\n"
+                help_msg += "To specify ratio and seed time. Ex: d:0.7:10 (ratio and time) or d:0.7 "
+                help_msg += "(only ratio) or d::10 (only time) where time in minutes"
+                help_msg += "\n\n<b>Multi links only by replying to first link/file:</b>"
+                help_msg += "\n<code>/qbcmd</code> 10(number of links/files)"
             else:
-                tag = reply_to.from_user.mention_html(reply_to.from_user.first_name)
-        if len(link) == 0 or not is_url(link) and not is_magnet(link):
-            if file_ is None:
-                reply_text = reply_to.text.split(maxsplit=1)[0].strip()
-                if is_url(reply_text) or is_magnet(reply_text):
-                    link = reply_to.text.strip()
-            elif isinstance(file_, list):
-                link = file_[-1].get_file().file_path
-            elif not isQbit and file_.mime_type != "application/x-bittorrent":
-                listener = MirrorLeechListener(bot, message, isZip, extract, isQbit, isLeech, pswd, tag)
-                Thread(target=TelegramDownloadHelper(listener).add_download, args=(message, f'{DOWNLOAD_DIR}{listener.uid}/', name)).start()
-                if multi > 1:
-                    sleep(4)
-                    nextmsg = type('nextmsg', (object, ), {'chat_id': message.chat_id, 'message_id': message.reply_to_message.message_id + 1})
-                    nextmsg = sendMessage(message.text.replace(str(multi), str(multi - 1), 1), bot, nextmsg)
-                    nextmsg.from_user.id = message.from_user.id
-                    sleep(4)
-                    Thread(target=_mirror_leech, args=(bot, nextmsg, isZip, extract, isQbit, isLeech)).start()
-                return
-            else:
-                link = file_.get_file().file_path
+                help_msg += "\n<code>/cmd</code> {link} |newname pswd: xx [zip/unzip]"
+                help_msg += "\n\n<b>By replying to link/file:</b>"
+                help_msg += "\n<code>/cmd</code> |newname pswd: xx [zip/unzip]"
+                help_msg += "\n\n<b>Direct link authorization:</b>"
+                help_msg += "\n<code>/cmd</code> {link} |newname pswd: xx\nusername\npassword"
+                help_msg += "\n\n<b>Bittorrent selection:</b>"
+                help_msg += "\n<code>/cmd</code> <b>s</b> {link} or by replying to {file/link}"
+                help_msg += "\n\n<b>Bittorrent seed</b>:"
+                help_msg += "\n<code>/cmd</code> <b>d</b> {link} or by replying to {file/link}.\n"
+                help_msg += "To specify ratio and seed time. Ex: d:0.7:10 (ratio and time) or d:0.7 "
+                help_msg += "(only ratio) or d::10 (only time) where time in minutes"
+                help_msg += "\n\n<b>Multi links only by replying to first link/file:</b>"
+                help_msg += "\n<code>/cmd</code> 10(number of links/files)"
+            return sendMessage(help_msg, bot, message)
 
-    if not is_url(link) and not is_magnet(link):
-        help_msg = "<b>Send link along with command line:</b>"
-        if isQbit:
-            help_msg += "\n<code>/qbcmd</code> {link} pswd: xx [zip/unzip]"
-            help_msg += "\n\n<b>By replying to link/file:</b>"
-            help_msg += "\n<code>/qbcmd</code> pswd: xx [zip/unzip]"
-            help_msg += "\n\n<b>Bittorrent selection:</b>"
-            help_msg += "\n<code>/qbcmd</code> <b>s</b> {link} or by replying to {file/link}"
-            help_msg += "\n\n<b>Qbittorrent seed</b>:"
-            help_msg += "\n<code>/qbcmd</code> <b>d</b> {link} or by replying to {file/link}.\n"
-            help_msg += "To specify ratio and seed time. Ex: d:0.7:10 (ratio and time) or d:0.7 "
-            help_msg += "(only ratio) or d::10 (only time) where time in minutes"
-            help_msg += "\n\n<b>Multi links only by replying to first link/file:</b>"
-            help_msg += "\n<code>/qbcmd</code> 10(number of links/files)"
-        else:
-            help_msg += "\n<code>/cmd</code> {link} |newname pswd: xx [zip/unzip]"
-            help_msg += "\n\n<b>By replying to link/file:</b>"
-            help_msg += "\n<code>/cmd</code> |newname pswd: xx [zip/unzip]"
-            help_msg += "\n\n<b>Direct link authorization:</b>"
-            help_msg += "\n<code>/cmd</code> {link} |newname pswd: xx\nusername\npassword"
-            help_msg += "\n\n<b>Bittorrent selection:</b>"
-            help_msg += "\n<code>/cmd</code> <b>s</b> {link} or by replying to {file/link}"
-            help_msg += "\n\n<b>Bittorrent seed</b>:"
-            help_msg += "\n<code>/cmd</code> <b>d</b> {link} or by replying to {file/link}.\n"
-            help_msg += "To specify ratio and seed time. Ex: d:0.7:10 (ratio and time) or d:0.7 "
-            help_msg += "(only ratio) or d::10 (only time) where time in minutes"
-            help_msg += "\n\n<b>Multi links only by replying to first link/file:</b>"
-            help_msg += "\n<code>/cmd</code> 10(number of links/files)"
-        return sendMessage(help_msg, bot, message)
+        LOGGER.info(link)
 
-    LOGGER.info(link)
-
-    if not is_mega_link(link) and not isQbit and not is_magnet(link) \
-        and not is_gdrive_link(link) and not link.endswith('.torrent'):
-        content_type = get_content_type(link)
-        if content_type is None or re_match(r'text/html|text/plain', content_type):
-            try:
-                link = direct_link_generator(link)
-                LOGGER.info(f"Generated link: {link}")
-            except DirectDownloadLinkException as e:
-                LOGGER.info(str(e))
-                if str(e).startswith('ERROR:'):
-                    return sendMessage(str(e), bot, message)
-    elif isQbit and not is_magnet(link):
-        if link.endswith('.torrent') or "https://api.telegram.org/file/" in link:
-            content_type = None
-        else:
+        if not is_mega_link(link) and not isQbit and not is_magnet(link) \
+            and not is_gdrive_link(link) and not link.endswith('.torrent'):
             content_type = get_content_type(link)
-        if content_type is None or re_match(r'application/x-bittorrent|application/octet-stream', content_type):
-            try:
-                resp = rget(link, timeout=10, headers = {'user-agent': 'Wget/1.12'})
-                if resp.status_code == 200:
-                    file_name = str(time()).replace(".", "") + ".torrent"
-                    with open(file_name, "wb") as t:
-                        t.write(resp.content)
-                    link = str(file_name)
-                else:
-                    return sendMessage(f"{tag} ERROR: link got HTTP response: {resp.status_code}", bot, message)
-            except Exception as e:
-                error = str(e).replace('<', ' ').replace('>', ' ')
-                if error.startswith('No connection adapters were found for'):
-                    link = error.split("'")[1]
-                else:
-                    LOGGER.error(str(e))
-                    return sendMessage(tag + " " + error, bot, message)
-        else:
-            msg = "Qb commands for torrents only. if you are trying to dowload torrent then report."
-            return sendMessage(msg, bot, message)
-
-    listener = MirrorLeechListener(bot, message, isZip, extract, isQbit, isLeech, pswd, tag, select, seed)
-
-    if is_gdrive_link(link):
-        if not isZip and not extract and not isLeech:
-            gmsg = f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\n\n"
-            gmsg += f"Use /{BotCommands.ZipMirrorCommand[0]} to make zip of Google Drive folder\n\n"
-            gmsg += f"Use /{BotCommands.UnzipMirrorCommand[0]} to extracts Google Drive archive folder/file"
-            sendMessage(gmsg, bot, message)
-        else:
-            Thread(target=add_gd_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener, name)).start()
-    elif is_mega_link(link):
-        Thread(target=add_mega_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, name)).start()
-    elif isQbit and (is_magnet(link) or ospath.exists(link)):
-        Thread(target=QbDownloader(listener).add_qb_torrent, args=(link, f'{DOWNLOAD_DIR}{listener.uid}',
-                                                                   select, ratio, seed_time)).start()
-    else:
-        if len(mesg) > 1:
-            ussr = mesg[1]
-            if len(mesg) > 2:
-                pssw = mesg[2]
+            if content_type is None or re_match(r'text/html|text/plain', content_type):
+                try:
+                    link = direct_link_generator(link)
+                    LOGGER.info(f"Generated link: {link}")
+                except DirectDownloadLinkException as e:
+                    LOGGER.info(str(e))
+                    if str(e).startswith('ERROR:'):
+                        return sendMessage(str(e), bot, message)
+        elif isQbit and not is_magnet(link):
+            if link.endswith('.torrent') or "https://api.telegram.org/file/" in link:
+                content_type = None
             else:
-                pssw = ''
-            auth = f"{ussr}:{pssw}"
-            auth = "Basic " + b64encode(auth.encode()).decode('ascii')
-        else:
-            auth = ''
-        Thread(target=add_aria2c_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener, name,
-                                                 auth, select, ratio, seed_time)).start()
+                content_type = get_content_type(link)
+            if content_type is None or re_match(r'application/x-bittorrent|application/octet-stream', content_type):
+                try:
+                    resp = rget(link, timeout=10, headers = {'user-agent': 'Wget/1.12'})
+                    if resp.status_code == 200:
+                        file_name = str(time()).replace(".", "") + ".torrent"
+                        with open(file_name, "wb") as t:
+                            t.write(resp.content)
+                        link = str(file_name)
+                    else:
+                        return sendMessage(f"{tag} ERROR: link got HTTP response: {resp.status_code}", bot, message)
+                except Exception as e:
+                    error = str(e).replace('<', ' ').replace('>', ' ')
+                    if error.startswith('No connection adapters were found for'):
+                        link = error.split("'")[1]
+                    else:
+                        LOGGER.error(str(e))
+                        return sendMessage(tag + " " + error, bot, message)
+            else:
+                msg = "Qb commands for torrents only. if you are trying to dowload torrent then report."
+                return sendMessage(msg, bot, message)
 
-    if multi > 1:
-        sleep(4)
-        nextmsg = type('nextmsg', (object, ), {'chat_id': message.chat_id, 'message_id': message.reply_to_message.message_id + 1})
-        nextmsg = sendMessage(message.text.replace(str(multi), str(multi - 1), 1), bot, nextmsg)
-        nextmsg.from_user.id = message.from_user.id
-        sleep(4)
-        Thread(target=_mirror_leech, args=(bot, nextmsg, isZip, extract, isQbit, isLeech)).start()
+        listener = MirrorLeechListener(bot, message, isZip, extract, isQbit, isLeech, pswd, tag, select, seed)
+
+        if is_gdrive_link(link):
+            if not isZip and not extract and not isLeech:
+                gmsg = f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\n\n"
+                gmsg += f"Use /{BotCommands.ZipMirrorCommand[0]} to make zip of Google Drive folder\n\n"
+                gmsg += f"Use /{BotCommands.UnzipMirrorCommand[0]} to extracts Google Drive archive folder/file"
+                sendMessage(gmsg, bot, message)
+            else:
+                Thread(target=add_gd_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener, name)).start()
+        elif is_mega_link(link):
+            Thread(target=add_mega_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, name)).start()
+        elif isQbit and (is_magnet(link) or ospath.exists(link)):
+            Thread(target=QbDownloader(listener).add_qb_torrent, args=(link, f'{DOWNLOAD_DIR}{listener.uid}',
+                                                                    select, ratio, seed_time)).start()
+        else:
+            if len(mesg) > 1:
+                ussr = mesg[1]
+                if len(mesg) > 2:
+                    pssw = mesg[2]
+                else:
+                    pssw = ''
+                auth = f"{ussr}:{pssw}"
+                auth = "Basic " + b64encode(auth.encode()).decode('ascii')
+            else:
+                auth = ''
+            Thread(target=add_aria2c_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}', listener, name,
+                                                    auth, select, ratio, seed_time)).start()
+
+        if multi > 1:
+            sleep(4)
+            nextmsg = type('nextmsg', (object, ), {'chat_id': message.chat_id, 'message_id': message.reply_to_message.message_id + 1})
+            nextmsg = sendMessage(message.text.replace(str(multi), str(multi - 1), 1), bot, nextmsg)
+            nextmsg.from_user.id = message.from_user.id
+            sleep(4)
+            Thread(target=_mirror_leech, args=(bot, nextmsg, isZip, extract, isQbit, isLeech)).start()
 
 
 def mirror(update, context):

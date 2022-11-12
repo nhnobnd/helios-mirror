@@ -17,6 +17,8 @@ from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech, clone, ytdlp, shell, eval, delete, count, leech_settings, search, rss, bt_select
 from .helper.ext_utils.telegraph_helper import telegraph
+from requests import utils as rutils, get as rget
+import json
 
 def stats(update, context):
     if ospath.exists('.git'):
@@ -36,6 +38,8 @@ def stats(update, context):
     mem_t = get_readable_file_size(memory.total)
     mem_a = get_readable_file_size(memory.available)
     mem_u = get_readable_file_size(memory.used)
+    totalApi = rget(f'https://magnetread.onrender.com/total')
+    count = json.loads(totalApi.content)
     stats = f'<b>Commit Date:</b> {last_commit}\n\n'\
             f'<b>Bot Uptime:</b> {currentTime}\n\n'\
             f'<b>Total Disk Space:</b> {total}\n'\
@@ -47,7 +51,14 @@ def stats(update, context):
             f'<b>DISK:</b> {disk}%\n\n'\
             f'<b>Total Memory:</b> {mem_t}\n'\
             f'<b>Free:</b> {mem_a} | '\
-            f'<b>Used:</b> {mem_u}\n\n'
+            f'<b>Used:</b> {mem_u}\n\n'\
+            f'<b>Memory Used:</b> {get_readable_file_size(memory.used)}\n'\
+            f'<b>Today 0 J:</b> {count[0]}\n\n'\
+            f'<b>Today 1 J:</b> {count[2]}\n\n'\
+            f'<b>Today 2 J:</b> {count[4]}\n\n'\
+            f'<b>Today 0 F:</b> {count[1]}\n\n'\
+            f'<b>Today 1 F:</b> {count[3]}\n\n'\
+            f'<b>Today 2 F:</b> {count[5]}\n\n'
     sendMessage(stats, context.bot, update.message)
 
 

@@ -32,7 +32,7 @@ class TgUploader:
         self.__corrupted = 0
         self.__resource_lock = RLock()
         self.__is_corrupted = False
-        self.__sent_msg = app.get_messages(self.__listener.message.chat.id, self.__listener.uid)
+        self.__sent_msg = app.get_messages(self.__listener.message.chat.id, self.__listener.message.message_id)
         self.__size = size
         self.__user_settings()
         self.isPrivate = listener.message.chat.type in ['private', 'group']
@@ -134,24 +134,23 @@ class TgUploader:
                                 LOGGER.error(f"Failed To Send Video in PM:\n{err}")
                 elif is_audio:
                     duration , artist, title = get_media_info(up_path)
-                    self.__sent_msg = client.send_audio(chat_id=leechchat, audio=up_path,
-                                                                  caption=cap_mono,
-                                                                  duration=duration,
-                                                                  performer=artist,
-                                                                  title=title,
-                                                                  thumb=thumb,
-                                                                  disable_notification=True,
-                                                                  progress=self.__upload_progress)
+                    #self.__sent_msg = client.send_audio(chat_id=leechchat, audio=up_path,
+                     #                                             caption=cap_mono,
+                      #                                           performer=artist,
+                       #                                           title=title,
+                        #                                          thumb=thumb,
+                         #                                         disable_notification=True,
+                          #                                        progress=self.__upload_progress)
                     if not self.isPrivate and BOT_PM:
                         try:
                             app.copy_message(chat_id=self.__user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
                         except Exception as err:
                                 LOGGER.error(f"Failed To Send Audio in PM:\n{err}")
                 elif file_.upper().endswith(IMAGE_SUFFIXES):
-                    self.__sent_msg = self.__app.send_photo(chat_id=leechchat, photo=up_path,
-                                                                  caption=cap_mono,
-                                                                  disable_notification=True,
-                                                                  progress=self.__upload_progress)
+                    #self.__sent_msg = self.__app.send_photo(chat_id=leechchat, photo=up_path,
+                     #                                             caption=cap_mono,
+                      #                                            disable_notification=True,
+                       #                                           progress=self.__upload_progress)
                     if not self.isPrivate and BOT_PM:
                         try:
                             app.copy_message(chat_id=self.__user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
@@ -166,11 +165,11 @@ class TgUploader:
                         if self.__thumb is None and thumb is not None and ospath.lexists(thumb):
                             osremove(thumb)
                         return
-                self.__sent_msg = client.send_document(chat_id=leechchat, document=up_path,
-                                                                 thumb=thumb,
-                                                                 caption=cap_mono,
-                                                                 disable_notification=True,
-                                                                 progress=self.__upload_progress)
+                #self.__sent_msg = client.send_document(chat_id=leechchat, document=up_path,
+                #                                                 thumb=thumb,
+                #                                                 caption=cap_mono,
+                #                                                 disable_notification=True,
+                #                                                 progress=self.__upload_progress)
                 if not self.isPrivate and BOT_PM:
                     try:
                         app.copy_message(chat_id=self.__user_id, from_chat_id=self.__sent_msg.chat.id, message_id=self.__sent_msg.id)
