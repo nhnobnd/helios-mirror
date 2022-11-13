@@ -199,6 +199,8 @@ class MirrorLeechListener:
             for s in m_size:
                 size = size - s
             LOGGER.info(f"Leech Name: {up_name}")
+            if up_name.find("@") != -1:
+                up_name=up_name.split('@')[1]
             tg = TgUploader(up_name, up_dir, size, self)
             tg_upload_status = TgUploadStatus(tg, size, gid, self)
             with download_dict_lock:
