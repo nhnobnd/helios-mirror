@@ -58,7 +58,7 @@ class TgUploader:
                         else:
                             LOGGER.error(e)
                             continue
-                    self.__upload_file(up_path, file_, dirpath)
+                    self.__upload_file(up_path, self.name, dirpath)
                     if self.__is_cancelled:
                         return
                     if not self.__listener.isPrivate and not self.__is_corrupted:
@@ -92,7 +92,7 @@ class TgUploader:
             osrename(up_path, new_path)
             up_path = new_path
         else:
-            cap_mono = f"<b>{file_}</b>"
+            cap_mono = f"<code>{file_}</code>"
         notMedia = False
         thumb = self.__thumb
         self.__is_corrupted = False
