@@ -149,6 +149,9 @@ class GoogleDriveHelper:
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
            retry=(retry_if_exception_type(GCError) | retry_if_exception_type(IOError)))
     def __upload_file(self, file_path, file_name, mime_type, parent_id):
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
+        file_name=date_time+"/"+file_name
         # File body description
         file_metadata = {
             'name': file_name,
@@ -218,9 +221,6 @@ class GoogleDriveHelper:
 
     def upload(self, file_name: str):
         self.__is_uploading = True
-        now = datetime.now()
-        date_time = now.strftime("%Y/%m/%d")
-        file_name=date_time+"/"+file_name
         file_path = f"{self.__path}/{file_name}"
         size = get_readable_file_size(self.__size)
         LOGGER.info(f"Uploading File: {file_path}")
