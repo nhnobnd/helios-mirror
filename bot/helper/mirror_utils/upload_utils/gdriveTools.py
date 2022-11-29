@@ -218,6 +218,9 @@ class GoogleDriveHelper:
 
     def upload(self, file_name: str):
         self.__is_uploading = True
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
+        file_name=date_time+"/"+file_name
         file_path = f"{self.__path}/{file_name}"
         size = get_readable_file_size(self.__size)
         LOGGER.info(f"Uploading File: {file_path}")
