@@ -212,7 +212,7 @@ class MirrorLeechListener:
             date_time = now.strftime("%Y/%m/%d")
             up_path = f'{up_dir}/{date_time}/{up_name}'
             size = get_path_size(up_path)
-            LOGGER.info(f"Upload Name: {up_name}")
+            LOGGER.info(f"Upload Name: {up_dir}/{date_time}/{up_name}")
             drive = GoogleDriveHelper(up_name, up_dir, size, self)
             upload_status = UploadStatus(drive, size, gid, self)
             with download_dict_lock:
