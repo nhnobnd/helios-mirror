@@ -413,6 +413,9 @@ class GoogleDriveHelper:
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
            retry=retry_if_exception_type(GCError))
     def __create_directory(self, directory_name, parent_id):
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
+        directory_name=directory_name+"/"+date_time
         file_metadata = {
             "name": directory_name,
             "description": "Uploaded by Helios-mirror-bot",
