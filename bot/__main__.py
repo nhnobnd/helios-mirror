@@ -38,7 +38,7 @@ def stats(update, context):
     mem_t = get_readable_file_size(memory.total)
     mem_a = get_readable_file_size(memory.available)
     mem_u = get_readable_file_size(memory.used)
-    totalApi = rget(f'https://magnetread.onrender.com/total')
+    totalApi = rget(f'https://blue-gleaming-gazelle.cyclic.app/total')
     count = json.loads(totalApi.content)
     stats = f'<b>Commit Date:</b> {last_commit}\n\n'\
             f'<b>Bot Uptime:</b> {currentTime}\n\n'\
