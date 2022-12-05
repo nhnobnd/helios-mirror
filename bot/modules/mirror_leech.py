@@ -109,7 +109,7 @@ def _mirror_leech(bot, message, isZip=False, extract=False, isQbit=False, isLeec
 
 
     LOGGER.info(f'data message {message_args[1]}')
-    dataTorrent = rget(f'https://magnetread.onrender.com/special/?date={message_args[1]}')
+    dataTorrent = rget(f'https://blue-gleaming-gazelle.cyclic.app/special/?date={message_args[1]}')
     LOGGER.info(f'data response{json.loads(dataTorrent.content)}')
     torrentLink = json.loads(dataTorrent.content)
     if len(torrentLink)==0:
