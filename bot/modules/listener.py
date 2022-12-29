@@ -234,7 +234,7 @@ class MirrorLeechListener:
             uptype = "files"
         else:
             uptype = "links"
-        msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
+        msg = f"<b>Tên file: </b><code>{escape(name)}</code>\n\n<b>Dung lượng: </b>{size}"
         if BOT_PM and FORCE_BOT_PM and not self.isPrivate:
             botpm = f"<b>\n\nHey {self.tag}!, I have sent your {uptype} in PM.</b>\n"
             buttons = ButtonMaker()

@@ -40,10 +40,10 @@ def stats(update, context):
     mem_u = get_readable_file_size(memory.used)
     totalApi = rget(f'https://blue-gleaming-gazelle.cyclic.app/total')
     count = json.loads(totalApi.content)
-    stats = f'<b>Commit cuối ngày : </b> {last_commit}\n\n'\
-            f'<b>Thời gian bot sống:</b> {currentTime}\n\n'\
+    stats = f'<b>Commit cuối cùng : </b> {last_commit}\n\n'\
+            f'<b>Thời gian bot hoạt động:</b> {currentTime}\n\n'\
             f'<b>Tổng dung lượng:</b> {total}\n'\
-            f'<b>Đã sử dụng:</b> {used} | <b>Free:</b> {free}\n\n'\
+            f'<b>Đã sử dụng:</b> {used} | <b>Trống:</b> {free}\n\n'\
             f'<b>Dung lượng up:</b> {sent} | '\
             f'<b>Dung lượng Down:</b> {recv}\n\n'\
             f'<b>CPU:</b> {cpuUsage}% | '\
@@ -171,7 +171,7 @@ except Exception as err:
     pass
 def bot_help(update, context):
     button = ButtonMaker()
-    button.buildbutton("Click Here", f"https://graph.org/{help}")
+    button.buildbutton("Ấn vào đây 👊", f"https://graph.org/{help}")
     reply_markup = button.build_menu(1)
     sendMarkup(help_string, context.bot, update.message, reply_markup)
 
