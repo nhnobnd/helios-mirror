@@ -56,8 +56,6 @@ def stats(update, context):
             f'<b>Today 1 J:</b> {count[2]}\n\n'\
             f'<b>Today 2 J:</b> {count[4]}\n\n'\
             f'\n\n'\
-            f'\n\n'\
-            f'\n\n'\
             f'<b>Today 0 F:</b> {count[1]}\n\n'\
             f'<b>Today 1 F:</b> {count[3]}\n\n'\
             f'<b>Today 2 F:</b> {count[5]}\n\n'
@@ -79,7 +77,7 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
         sendMarkup('Not an Authorized user, deploy your own helios-mirror-leech bot', context.bot, update.message, reply_markup)
 
 def restart(update, context):
-    restart_message = sendMessage("Restarting...", context.bot, update.message)
+    restart_message = sendMessage("Đang khởi động lại ...", context.bot, update.message)
     if Interval:
         Interval[0].cancel()
         Interval.clear()

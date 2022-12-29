@@ -187,7 +187,8 @@ def get_readable_message():
                     up_speed += float(spd.split('M')[0]) * 1048576
         bmsg = f"<b>CPU:</b> {cpu_percent()}% | <b>FREE:</b> {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}"
         bmsg += f"\n<b>RAM:</b> {virtual_memory().percent}% | <b>Thời gian hoạt động:</b> {get_readable_time(time() - botStartTime)}"
-        bmsg += f"\n<b>Tốc độ down:</b> {get_readable_file_size(dl_speed)}/s | <b>Tốc độ tải :</b> {get_readable_file_size(up_speed)}/s"
+        bmsg += f"\n<b>Tốc độ tải xuống :</b> {get_readable_file_size(dl_speed)}/s "
+        bmsg += f"\n <b>Tốc độ tải lên :</b> {get_readable_file_size(up_speed)}/s"
         buttons = ButtonMaker()
         buttons.sbutton("Thống Kê", str(FOUR))
         sbutton = buttons.build_menu(1)
