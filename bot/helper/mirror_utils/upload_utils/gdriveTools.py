@@ -21,6 +21,7 @@ from bot.helper.ext_utils.bot_utils import get_readable_file_size, setInterval
 from bot.helper.ext_utils.fs_utils import get_mime_type
 from bot.helper.ext_utils.html_helper import hmtl_content
 from bot.helper.ext_utils.telegraph_helper import telegraph
+from datetime import datetime
 LOGGER = getLogger(__name__)
 getLogger('googleapiclient.discovery').setLevel(ERROR)
 
@@ -31,6 +32,8 @@ if USE_SERVICE_ACCOUNTS:
 class GoogleDriveHelper:
 
     def __init__(self, name=None, path=None, size=0, listener=None):
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
         self.__G_DRIVE_TOKEN_FILE = "token.pickle"
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
         self.__G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
@@ -56,7 +59,7 @@ class GoogleDriveHelper:
         self.__update_interval = 3
         self.__size = size
         self._file_processed_bytes = 0
-        self.name = name
+        self.name = date_time+"/"+name
         self.processed_bytes = 0
         self.transferred_size = 0
 
@@ -146,6 +149,9 @@ class GoogleDriveHelper:
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
            retry=(retry_if_exception_type(GCError) | retry_if_exception_type(IOError)))
     def __upload_file(self, file_path, file_name, mime_type, parent_id):
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
+        file_name=date_time+"/"+file_name
         # File body description
         file_metadata = {
             'name': file_name,
@@ -407,6 +413,9 @@ class GoogleDriveHelper:
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
            retry=retry_if_exception_type(GCError))
     def __create_directory(self, directory_name, parent_id):
+        now = datetime.now()
+        date_time = now.strftime("%Y/%m/%d")
+        directory_name=directory_name+"/"+date_time
         file_metadata = {
             "name": directory_name,
             "description": "Uploaded by Helios-mirror-bot",

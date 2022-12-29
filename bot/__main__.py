@@ -17,6 +17,8 @@ from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror_leech, clone, ytdlp, shell, eval, delete, count, leech_settings, search, rss, bt_select
 from .helper.ext_utils.telegraph_helper import telegraph
+from requests import utils as rutils, get as rget
+import json
 
 def stats(update, context):
     if ospath.exists('.git'):
@@ -36,18 +38,29 @@ def stats(update, context):
     mem_t = get_readable_file_size(memory.total)
     mem_a = get_readable_file_size(memory.available)
     mem_u = get_readable_file_size(memory.used)
-    stats = f'<b>Commit Date:</b> {last_commit}\n\n'\
-            f'<b>Bot Uptime:</b> {currentTime}\n\n'\
-            f'<b>Total Disk Space:</b> {total}\n'\
-            f'<b>Used:</b> {used} | <b>Free:</b> {free}\n\n'\
-            f'<b>Up:</b> {sent} | '\
-            f'<b>Down:</b> {recv}\n\n'\
+    totalApi = rget(f'https://blue-gleaming-gazelle.cyclic.app/total')
+    count = json.loads(totalApi.content)
+    stats = f'<b>Commit cuối cùng : </b> {last_commit}\n\n'\
+            f'<b>Thời gian bot hoạt động:</b> {currentTime}\n\n'\
+            f'<b>Tổng dung lượng:</b> {total}\n'\
+            f'<b>Đã sử dụng:</b> {used} | <b>Trống:</b> {free}\n\n'\
+            f'<b>Dung lượng up:</b> {sent} | '\
+            f'<b>Dung lượng Down:</b> {recv}\n\n'\
             f'<b>CPU:</b> {cpuUsage}% | '\
             f'<b>RAM:</b> {mem_p}% | '\
             f'<b>DISK:</b> {disk}%\n\n'\
-            f'<b>Total Memory:</b> {mem_t}\n'\
-            f'<b>Free:</b> {mem_a} | '\
-            f'<b>Used:</b> {mem_u}\n\n'
+            f'<b>Tổng bộ nhớ:</b> {mem_t}\n'\
+            f'<b>Bộ nhớ rảnh:</b> {mem_a} | '\
+            f'<b>Bộ nhớ đã sử dụng:</b> {mem_u}\n\n'\
+            f'<b>Today 0 J:</b> {count[0]}\n\n'\
+            f'<b>Today 1 J:</b> {count[2]}\n\n'\
+            f'<b>Today 2 J:</b> {count[4]}\n\n'\
+            f'\n\n'\
+            f'\n\n'\
+            f'\n\n'\
+            f'<b>Today 0 F:</b> {count[1]}\n\n'\
+            f'<b>Today 1 F:</b> {count[3]}\n\n'\
+            f'<b>Today 2 F:</b> {count[5]}\n\n'
     sendMessage(stats, context.bot, update.message)
 
 
@@ -146,11 +159,11 @@ NOTE: Try each command without any perfix to see more detalis.<br><br>
 '''
 
 help_string = f'''
-Hei, Need Help!!
+Thông tin bên dưới 👇
 '''
 try:
     help = telegraph.create_page(
-        title='Helios-Mirror Help',
+        title='OBND-MIRROR HELP',
         content=help_string_telegraph,
     )["path"]
 except Exception as err:
@@ -158,7 +171,7 @@ except Exception as err:
     pass
 def bot_help(update, context):
     button = ButtonMaker()
-    button.buildbutton("Click Here", f"https://graph.org/{help}")
+    button.buildbutton("Ấn vào đây 👊", f"https://graph.org/{help}")
     reply_markup = button.build_menu(1)
     sendMarkup(help_string, context.bot, update.message, reply_markup)
 

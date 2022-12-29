@@ -21,11 +21,14 @@ from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot.helper.ext_utils.db_handler import DbManger
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.ext_utils.bot_utils import is_url, is_magnet
+from datetime import datetime
 class MirrorLeechListener:
     def __init__(self, bot, message, isZip=False, extract=False, isQbit=False, isLeech=False, pswd=None, tag=None, select=False, seed=False):
+        dt = datetime.now()
+        ts = datetime.timestamp(dt)
         self.bot = bot
         self.message = message
-        self.uid = message.message_id
+        self.uid = str(self.message.message_id)+str(ts)
         self.extract = extract
         self.isZip = isZip
         self.isQbit = isQbit
@@ -196,6 +199,8 @@ class MirrorLeechListener:
             for s in m_size:
                 size = size - s
             LOGGER.info(f"Leech Name: {up_name}")
+            if up_name.find("@") != -1:
+                up_name=up_name.split('@')[1]
             tg = TgUploader(up_name, up_dir, size, self)
             tg_upload_status = TgUploadStatus(tg, size, gid, self)
             with download_dict_lock:
@@ -203,9 +208,10 @@ class MirrorLeechListener:
             update_all_messages()
             tg.upload(o_files)
         else:
+          
             up_path = f'{up_dir}/{up_name}'
             size = get_path_size(up_path)
-            LOGGER.info(f"Upload Name: {up_name}")
+            LOGGER.info(f"Upload Name: {up_dir}/{up_name}")
             drive = GoogleDriveHelper(up_name, up_dir, size, self)
             upload_status = UploadStatus(drive, size, gid, self)
             with download_dict_lock:
@@ -228,7 +234,7 @@ class MirrorLeechListener:
             uptype = "files"
         else:
             uptype = "links"
-        msg = f"<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}"
+        msg = f"<b>Tên file: </b><code>{escape(name)}</code>\n\n<b>Dung lượng: </b>{size}"
         if BOT_PM and FORCE_BOT_PM and not self.isPrivate:
             botpm = f"<b>\n\nHey {self.tag}!, I have sent your {uptype} in PM.</b>\n"
             buttons = ButtonMaker()
@@ -277,9 +283,9 @@ class MirrorLeechListener:
                 b_name = bot.get_me().username
                 botstart = f"http://t.me/{b_name}"
                 buttons.buildbutton("View file in PM", f"{botstart}")
-            msg += f'\n<b>Total Files: </b>{folders}'
+            msg += f'\n<b>Tổng file: </b>{folders}'
             if typ != 0:
-                msg += f'\n<b>Corrupted Files: </b>{typ}'
+                msg += f'\n<b>Tổng file lỗi: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if not files:
                 sendMessage(msg, self.bot, self.message)
@@ -310,13 +316,13 @@ class MirrorLeechListener:
                     clean_target(self.newDir)
                 return
         else:
-            msg += f'\n\n<b>Type: </b>{typ}'
+            msg += f'\n\n<b>Loại file: </b>{typ}'
             if typ == "Folder":
-                msg += f'\n<b>SubFolders: </b>{folders}'
+                msg += f'\n<b>Thư mục con: </b>{folders}'
                 msg += f'\n<b>Files: </b>{files}'
             buttons = ButtonMaker()
             msg += f'\n\n<b>cc: </b>{self.tag}'
-            buttons.buildbutton("☁️ Drive Link", link)
+            buttons.buildbutton("🌤️ Google Drive", link)
             LOGGER.info(f'Done Uploading {name}')
             if INDEX_URL is not None:
                 url_path = rutils.quote(f'{name}')
@@ -334,7 +340,7 @@ class MirrorLeechListener:
                             mesg = message_args[1]
                             if is_magnet(mesg):
                                 link = telegraph.create_page(
-                                    title='Helios-Mirror Source Link',
+                                    title='OBND-Mirror Source Link',
                                     content=mesg,
                                 )["path"]
                                 buttons.buildbutton(f"🔗 Source Link", f"https://graph.org/{link}")
@@ -356,7 +362,7 @@ class MirrorLeechListener:
                                 source_link = reply_text.strip()
                                 if is_magnet(source_link):
                                     link = telegraph.create_page(
-                                        title='Helios-Mirror Source Link',
+                                        title='OBND-Mirror Source Link',
                                         content=source_link,
                                     )["path"]
                                     buttons.buildbutton(f"🔗 Source Link", f"https://graph.org/{link}")
@@ -421,7 +427,7 @@ class MirrorLeechListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = f"{self.tag} your download has been stopped due to: {error}"
+        msg = f"{self.tag} File tải của bạn tạm dừng bởi vì : {error}"
         errmsg = sendMessage(msg, self.bot, self.message)
         Thread(target=auto_delete_upload_message, args=(self.bot, self.message, errmsg)).start()
         if count == 0:
