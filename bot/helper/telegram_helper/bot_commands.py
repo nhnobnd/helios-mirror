@@ -42,8 +42,8 @@ class _BotCommands:
         self.AddSudoCommand = f'addsudo{CMD_INDEX}'
         self.RmSudoCommand = f'rmsudo{CMD_INDEX}'
         self.PingCommand = f'ping{CMD_INDEX}'
-        self.RestartCommand = f'restart{CMD_INDEX}'
-        self.StatsCommand = f'stats{CMD_INDEX}'
+        self.RestartCommand = getCommand('RESTART_CMD', f'restart{CMD_INDEX}')
+        self.StatsCommand = getCommand('STATS_CMD', f'stats{CMD_INDEX}')
         self.HelpCommand = f'help{CMD_INDEX}'
         self.LogCommand = f'log{CMD_INDEX}'
         self.ShellCommand = f'shell{CMD_INDEX}'
